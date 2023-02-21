@@ -21,7 +21,7 @@ func (v *Validation) Validate(s interface{}) error {
 }
 ```
 
-Proses overwrite validator Echo dapat langsung dilakukan dengan menggunakan field instance Echo dan mengisinya dengan pointer struct `Validation` (untuk field `validator` pastikan sudah menerima instance dari engine validator):   
+Proses overwrite validator Echo dapat dilakukan dengan assignment value ke instance engine Echo menggunakan pointer struct `Validation` (untuk field `validator` pastikan sudah menerima instance dari engine validator).   
 ```go
 func main() {
     e := echo.New()
@@ -29,7 +29,7 @@ func main() {
 }
 ```
 
-Untuk custom response menggunakan `echo.HTTPErrorHandler` yang sudah dikelompokan berdasarkan jenis error yang bersumber dari framework Echo (HTTPError), proses validasi atau lainnya.
+Untuk membuat response secara umum kita dapat memanfaatkan error handler yang sudah disediakan Echo menggunakan `echo.HTTPErrorHandler` yang sudah dikelompokan berdasarkan jenis error yang bersumber dari framework Echo (HTTPError), proses validasi atau lainnya.
 ```go
 e.HTTPErrorHandler = func(err error, c echo.Context) {
     var report *echo.HTTPError
