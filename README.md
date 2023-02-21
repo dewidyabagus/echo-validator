@@ -65,7 +65,7 @@ e.HTTPErrorHandler = func(err error, c echo.Context) {
 
 Dari penjelasan diatas ketika disusun menjadi kode yang utuh seperti berikut :
 ```go
-// github.com/dewidyabagus/echo-validator/simple/main.go
+// ./simple/main.go
 package main
 
 import (
