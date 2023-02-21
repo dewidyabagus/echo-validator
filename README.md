@@ -13,11 +13,11 @@ Untuk lebih detail macam-macam validasi dan metode yang digunakan silahkan lihat
 Proses penulisan custom validator dimulai dengan membuat `struct` yang memiliki field bertipe `*validator.Validate` dan method `Validate(s interface{}) error` yang nantinya akan digunakan sebagai proses validasi data melalui `echo.Context`.
 ```go
 type Validation struct {
-	validator *validator.Validate
+    validator *validator.Validate
 }
 
 func (v *Validation) Validate(s interface{}) error {
-	return v.validator.Struct(s)
+    return v.validator.Struct(s)
 }
 ```
 
@@ -69,74 +69,74 @@ Dari penjelasan diatas ketika disusun menjadi kode yang utuh seperti berikut :
 package main
 
 import (
-	"fmt"
-	"net/http"
+    "fmt"
+    "net/http"
 
-	validator "github.com/go-playground/validator/v10"
-	echo "github.com/labstack/echo/v4"
+    validator "github.com/go-playground/validator/v10"
+    echo "github.com/labstack/echo/v4"
 )
 
 type User struct {
-	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"required,email"`
+    Name  string `json:"name" validate:"required"`
+    Email string `json:"email" validate:"required,email"`
 }
 
 type Validation struct {
-	validator *validator.Validate
+    validator *validator.Validate
 }
 
 func (v *Validation) Validate(s interface{}) error {
-	return v.validator.Struct(s)
+    return v.validator.Struct(s)
 }
 
 func main() {
-	e := echo.New()
-	e.Validator = &Validation{validator: validator.New()}
+    e := echo.New()
+    e.Validator = &Validation{validator: validator.New()}
 
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
-		var report *echo.HTTPError
+    e.HTTPErrorHandler = func(err error, c echo.Context) {
+	var report *echo.HTTPError
 
-		switch valErr := err.(type) {
+	switch valErr := err.(type) {
+	default:
+	    report = echo.NewHTTPError(http.StatusInternalServerError, valErr.Error())
+
+	case validator.ValidationErrors:
+	    report = echo.NewHTTPError(http.StatusBadRequest)
+	    if len(valErr) > 0 {
+                switch valErr[0].Tag() {
+		case "required":
+		    report.Message = fmt.Sprintf("%s is required", valErr[0].Field())
+
+	        case "email":
+		    report.Message = fmt.Sprintf("%s is not valid email", valErr[0].Field())
+
 		default:
-			report = echo.NewHTTPError(http.StatusInternalServerError, valErr.Error())
-
-		case validator.ValidationErrors:
-			report = echo.NewHTTPError(http.StatusBadRequest)
-			if len(valErr) > 0 {
-				switch valErr[0].Tag() {
-				case "required":
-					report.Message = fmt.Sprintf("%s is required", valErr[0].Field())
-
-				case "email":
-					report.Message = fmt.Sprintf("%s is not valid email", valErr[0].Field())
-
-				default:
-					report.Message = valErr[0].Error()
-				}
-			} else {
-				report.Message = valErr.Error()
-			}
-
-		case *echo.HTTPError:
-			report = valErr
+		    report.Message = valErr[0].Error()
 		}
+	    } else {
+	        report.Message = valErr.Error()
+	    }
 
-		c.JSON(report.Code, report)
+	case *echo.HTTPError:
+	    report = valErr
 	}
 
-	e.POST("/users", func(c echo.Context) error {
-		user := new(User)
-		if err := c.Bind(user); err != nil {
-			return err
-		}
-		if err := c.Validate(user); err != nil {
-			return err
-		}
+	c.JSON(report.Code, report)
+    }
 
-		return c.JSON(http.StatusCreated, echo.Map{"message": "berhasil membuat user baru!"})
-	})
+    e.POST("/users", func(c echo.Context) error {
+        user := new(User)
+	if err := c.Bind(user); err != nil {
+	    return err
+	}
+	if err := c.Validate(user); err != nil {
+	    return err
+	}
 
-	e.Start(":7001")
+	return c.JSON(http.StatusCreated, echo.Map{"message": "berhasil membuat user baru!"})
+    })
+
+    e.Start(":7001")
 }
 ```
 
