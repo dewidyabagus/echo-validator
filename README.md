@@ -4,8 +4,8 @@ Framework Echo tidak mendukung proses validasi data secara bawaan. Ketika kita i
 Sebagai contoh saya membuat sebuah endpoint yang digunakan untuk registrasi user dengan URL `POST http://localhost:7001/users`, dimana endpoint tersebut menerima data dalam format `JSON` dengan field `name` dan `email` user. Untuk masing-masing data yang diterima wajib diisi dan untuk `email` harus sesuai dengan format email. Untuk menulis rules menggunakan tag `validate:"rules"`.   
 ```go
 type User struct {
-	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"required,email"`
+    Name  string `json:"name" validate:"required"`
+    Email string `json:"email" validate:"required,email"`
 }
 ```
 Untuk lebih detail macam-macam validasi dan metode yang digunakan silahkan lihat dilaman github https://github.com/go-playground/validator.
